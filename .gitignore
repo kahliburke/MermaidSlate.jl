@@ -1,0 +1,5 @@
+# A library, not an application: the resolved versions are the consumer's to pick.
+Manifest.toml
+
+# Per-notebook forked environments, created by Slate on demand.
+notebooks/*_env/
