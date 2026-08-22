@@ -1,0 +1,29 @@
+# Catalog listing for Slate's Extensions gallery. Every key is optional — without this file the
+# package still lists, using its name, version, repo and module docstring. This fills in the parts
+# that can't be harvested.
+
+title    = "Mermaid"
+tagline  = "Mermaid diagrams as computed values — text in, diagram out"
+icon     = "🧜"
+categories = ["visualization", "documents"]
+
+# The demo notebook. The gallery links to it, and docs/generate_extension_assets.mjs in the
+# KaimonSlate repo runs it headless to photograph the page.
+example = "notebooks/mermaid.jl"
+
+screenshots = ["docs/assets/MermaidSlate-notebook.png"]
+
+# A recorded walkthrough, once it's hosted. An absolute URL is fine and usually better than
+# committing the file — the catalog build mirrors it into the published artifact either way.
+# video = "https://kahliburke.github.io/MermaidSlate.jl/demo.mp4"
+
+snippet = """
+using MermaidSlate
+mermaid("flowchart LR; A --> B")
+"""
+
+provides = [
+    "`mermaid(src; theme)` — a diagram value any cell can return",
+    "Markdown fence renderer: ```mermaid blocks render in place",
+    "Diagrams built from live values, so the picture follows the data",
+]

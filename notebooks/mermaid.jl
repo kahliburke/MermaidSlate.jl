@@ -112,7 +112,7 @@ mermaid(type_tree(Number; maxdepth = depth))
 
 #%% code id=gantt
 tasks = [
-    (section = "Design", name = "extension seams",   start = "2026-08-18", days = 3),
+    (section = "Design", name = "extension points",  start = "2026-08-18", days = 3),
     (section = "Design", name = "asset strategy",    start = "2026-08-20", days = 2),
     (section = "Build",  name = "fence renderer",    start = "2026-08-21", days = 4),
     (section = "Build",  name = "front-end module",  start = "2026-08-24", days = 5),

@@ -18,8 +18,8 @@ and, equivalently, in a markdown cell:
         A --> B
     ```
 
-Built entirely against the lean `SlateExtensionsBase` SDK — no KaimonSlate dependency. Three seams
-carry the whole package:
+Built entirely against the lean `SlateExtensionsBase` SDK — no KaimonSlate dependency. Three
+extension points carry the whole package:
 
 - [`MermaidDiagram`](@ref) + `slate_render` — a returned diagram renders as a component, which is
   what makes it an ordinary value: storable in a `Vector`, returnable from a function, composable.
@@ -146,7 +146,7 @@ SlateExtensionsBase.slate_render(d::MermaidDiagram) =
 #   the manifest drain, so registering only from `__slate_frontend` leaves every fence in that first
 #   batch unclaimed, silently falling back to a plain code block;
 # - the COMPONENT must be registered even when nothing runs at all, because a notebook reopened with
-#   every cell restored from the durable memo evaluates nothing, and a dispatch-driven seam
+#   every cell restored from the durable memo evaluates nothing, and a dispatch-driven hook
 #   (`required_assets`) would then never fire and no diagram in the document would draw. A `@bind`
 #   widget escapes that because `@bind` statements are replayed on restore; a RETURNED value isn't.
 function _register!()
