@@ -30,8 +30,10 @@ using MermaidSlate
 mermaid("flowchart LR; A --> B")
 """
 
+# Plain text: the gallery and the catalog site both render these literally, so markdown here shows
+# up as stray backticks.
 provides = [
-    "`mermaid(src; theme)` — a diagram value any cell can return",
-    "Markdown fence renderer: ```mermaid blocks render in place",
+    "mermaid(src; theme) — a diagram value any cell can return",
+    "Markdown fence renderer: a mermaid-tagged block renders in place",
     "Diagrams built from live values, so the picture follows the data",
 ]
