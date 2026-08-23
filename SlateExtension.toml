@@ -11,14 +11,17 @@ categories = ["visualization", "documents"]
 # KaimonSlate repo runs it headless to photograph the page.
 example = "notebooks/mermaid.jl"
 
-# Card imagery, once hosted. Point these at wherever you publish — Pages, a release asset, a CDN.
-# Don't commit binaries here: the catalog build mirrors whatever it can fetch into the published
-# artifact, so the gallery serves its own copy and your host only needs to be up at build time.
-# Generate a starting screenshot with `node docs/generate_extension_assets.mjs --path .` in the
-# KaimonSlate repo, then upload it.
+# Card imagery, hosted on this repo's `media` release rather than committed — screenshots get
+# regenerated often and don't belong in git history. The catalog build mirrors these into the
+# published artifact, so the release only has to be reachable when the catalog is built, and each
+# asset must stay under 8 MB to be mirrored.
 #
-# screenshots = ["https://kahliburke.github.io/MermaidSlate.jl/notebook.png"]
-# video       = "https://kahliburke.github.io/MermaidSlate.jl/demo.mp4"
+# Regenerate the screenshot from the KaimonSlate repo:
+#   node docs/generate_extension_assets.mjs --path /path/to/MermaidSlate.jl
+#   gh release upload media "$TMPDIR/slate-ext-assets/MermaidSlate-notebook.png" --clobber
+screenshots = ["https://github.com/kahliburke/MermaidSlate.jl/releases/download/media/MermaidSlate-notebook.png"]
+
+# video = "https://github.com/kahliburke/MermaidSlate.jl/releases/download/media/MermaidSlate-demo.mp4"
 
 snippet = """
 using MermaidSlate
