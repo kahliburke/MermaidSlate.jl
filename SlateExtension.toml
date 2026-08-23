@@ -21,7 +21,9 @@ example = "notebooks/mermaid.jl"
 #   gh release upload media "$TMPDIR/slate-ext-assets/MermaidSlate-notebook.png" --clobber
 screenshots = ["https://github.com/kahliburke/MermaidSlate.jl/releases/download/media/MermaidSlate-notebook.png"]
 
-# video = "https://github.com/kahliburke/MermaidSlate.jl/releases/download/media/MermaidSlate-demo.mp4"
+# Hand-recorded, not generated — a walkthrough needs someone deciding what to show. Downscaled to
+# 1600px for the card; the full-resolution capture is kept outside this repo.
+video = "https://github.com/kahliburke/MermaidSlate.jl/releases/download/media/MermaidSlate-demo.mp4"
 
 snippet = """
 using MermaidSlate
