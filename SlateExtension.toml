@@ -11,11 +11,14 @@ categories = ["visualization", "documents"]
 # KaimonSlate repo runs it headless to photograph the page.
 example = "notebooks/mermaid.jl"
 
-screenshots = ["docs/assets/MermaidSlate-notebook.png"]
-
-# A recorded walkthrough, once it's hosted. An absolute URL is fine and usually better than
-# committing the file — the catalog build mirrors it into the published artifact either way.
-# video = "https://kahliburke.github.io/MermaidSlate.jl/demo.mp4"
+# Card imagery, once hosted. Point these at wherever you publish — Pages, a release asset, a CDN.
+# Don't commit binaries here: the catalog build mirrors whatever it can fetch into the published
+# artifact, so the gallery serves its own copy and your host only needs to be up at build time.
+# Generate a starting screenshot with `node docs/generate_extension_assets.mjs --path .` in the
+# KaimonSlate repo, then upload it.
+#
+# screenshots = ["https://kahliburke.github.io/MermaidSlate.jl/notebook.png"]
+# video       = "https://kahliburke.github.io/MermaidSlate.jl/demo.mp4"
 
 snippet = """
 using MermaidSlate
