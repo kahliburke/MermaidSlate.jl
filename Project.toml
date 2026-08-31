@@ -1,6 +1,6 @@
 name = "MermaidSlate"
 uuid = "8b1dd0a1-40b8-40bb-ae57-fd8e602dd54e"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Kahli Burke <kahli@kahliburke.com>"]
 
 # A Slate extension: depends ONLY on the lean SlateExtensionsBase SDK, never on KaimonSlate.
