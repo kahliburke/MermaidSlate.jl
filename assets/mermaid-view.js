@@ -73,14 +73,20 @@ if (!window.__mermaidSlateThemeHook) {
 //
 //   - `htmlLabels` (Mermaid's default) puts every node label in a `<foreignObject>` — HTML inside
 //     the SVG. Typst renders SVG through resvg, which has no HTML engine, so every label in a
-//     flowchart, state or class diagram comes out blank. Sequence and Gantt diagrams don't use them
-//     and would have survived, which is the worst kind of half-working.
+//     flowchart, state or class diagram comes out blank.
 //   - `fontFamily: inherit` resolves against the page. A file has no page, so the text falls back to
 //     whatever the renderer picks and the boxes Mermaid measured no longer fit it.
 //
-// So a print render is its own render, not a transform of the live one: labels as `<text>`, a font
-// named outright, and the theme resolved from the EXPORT palette rather than the live one — the
-// notebook may be dark on screen and the PDF light. Named export, picked up by `registerComponent`.
+// Turning `htmlLabels` off is not a fix on its own: labels then become SVG `<text>`, which shows any
+// HTML in the source (`<b>`, `<small>`, entities) as literal tags, and the PDF's fonts have no emoji.
+// A diagram that looks right on screen should look the same on paper, so a diagram that needs HTML
+// labels is rasterised by the browser that already draws it correctly (`rasterFigure`). Diagrams
+// without `<foreignObject>` (sequence, Gantt, ...) stay vector through `vectorFigure`, as does any
+// diagram in a browser that refuses to read back the canvas.
+//
+// Both renders are their own renders, not transforms of the live one, with the theme resolved from
+// the EXPORT palette rather than the live one: the notebook may be dark on screen and the PDF light.
+// `exportFigure` is a named export, picked up by `registerComponent`.
 //
 // Helvetica/Arial specifically: Mermaid measures label text in the browser to size each node, and
 // Typst re-renders it. Metrics only agree if both sides resolve the same font, so the pair to name
@@ -95,26 +101,74 @@ const PRINT_FONT = "Helvetica, Arial, sans-serif";
 const PRINT_WIDTH = 1000;      // lay out at ~1.5× a text column, so labels survive the scale-down
 const PRINT_WRAP  = 400;       // ...and a long identifier stays one word instead of hard-breaking
 
+// Raster resolution: 3× the diagram's own size, capped in total pixels so a very large diagram
+// doesn't exceed the browser's canvas limit or bloat the PDF.
+const RASTER_SCALE = 3;
+const RASTER_MAX_PIXELS = 32e6;
+
 export async function exportFigure(el, { params, dark }) {
   const theme = params.theme && params.theme !== "auto" ? params.theme : dark ? "dark" : "default";
   // Through the same queue as a live draw: `initialize` is global config, so an export landing
   // between a diagram's initialize and its render would draw it in the export's theme.
   return enqueue(async () => {
     const mermaid = await loadMermaid();
-    mermaid.initialize({
-      startOnLoad: false,
-      theme,
-      securityLevel: "loose",
-      fontFamily: PRINT_FONT,
-      htmlLabels: false,
-      flowchart: { htmlLabels: false, wrappingWidth: PRINT_WRAP },
-      class: { htmlLabels: false },
-      state: { wrappingWidth: PRINT_WRAP },
-      gantt: { useWidth: PRINT_WIDTH },
-    });
-    const { svg } = await mermaid.render(nextId(), params.source);
-    return { svg };
+    const png = await rasterFigure(mermaid, el, params.source, theme);
+    return png ? { png } : vectorFigure(mermaid, params.source, theme);
   });
+}
+
+async function vectorFigure(mermaid, source, theme) {
+  mermaid.initialize({
+    startOnLoad: false,
+    theme,
+    securityLevel: "loose",
+    fontFamily: PRINT_FONT,
+    htmlLabels: false,
+    flowchart: { htmlLabels: false, wrappingWidth: PRINT_WRAP },
+    class: { htmlLabels: false },
+    state: { wrappingWidth: PRINT_WRAP },
+    gantt: { useWidth: PRINT_WIDTH },
+  });
+  const { svg } = await mermaid.render(nextId(), source);
+  return { svg };
+}
+
+// The screen render as a base64 PNG, or null when the diagram has no HTML labels (vector is better)
+// or the browser won't rasterise it.
+async function rasterFigure(mermaid, el, source, theme) {
+  // The SVG is drawn as an isolated image, where `inherit` has nothing to inherit from. Naming the
+  // page's font makes Mermaid measure the labels in the same font the image will draw them in.
+  const fontFamily = getComputedStyle(el).fontFamily || "system-ui, sans-serif";
+  mermaid.initialize({ startOnLoad: false, theme, securityLevel: "loose", fontFamily });
+  const { svg } = await mermaid.render(nextId(), source);
+  if (!svg.includes("<foreignObject")) return null;
+
+  // Mermaid's string is HTML-serialised (`<br>` unclosed, ...), which fails to load as an image.
+  // Parsing it into the DOM and writing it back out with XMLSerializer gives well-formed XML.
+  const holder = document.createElement("div");
+  holder.innerHTML = svg;
+  const node = holder.querySelector("svg");
+  const vb = node && node.viewBox && node.viewBox.baseVal;
+  if (!vb || !vb.width || !vb.height) return null;
+  node.setAttribute("width", vb.width);
+  node.setAttribute("height", vb.height);
+  node.style.maxWidth = "none";
+  const xml = new XMLSerializer().serializeToString(node);
+
+  const img = new Image();
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(xml);
+  try { await img.decode(); } catch (_) { return null; }
+
+  const scale = Math.min(RASTER_SCALE, Math.sqrt(RASTER_MAX_PIXELS / (vb.width * vb.height)));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.ceil(vb.width * scale);
+  canvas.height = Math.ceil(vb.height * scale);
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
+  ctx.drawImage(img, 0, 0, vb.width, vb.height);
+  // Safari marks a canvas that has drawn an SVG with `<foreignObject>` as tainted, so reading it
+  // back throws there; the caller falls back to the vector render.
+  try { return canvas.toDataURL("image/png").split(",")[1] || null; } catch (_) { return null; }
 }
 
 export default ({ params }) => {
